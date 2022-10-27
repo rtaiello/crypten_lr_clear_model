@@ -49,7 +49,7 @@ def load_mnist() -> (torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
 
 def softmax_crossentropy_with_logits(logits: crypten.CrypTensor, reference_answers):
     # Compute crossentropy from logits[batch,n_classes] and ids of correct answers
-    one_hot = torch.nn.functional.one_hot(reference_answers, 10)
+    one_hot = torch.nn.functional.one_hot(reference_answers, 10).to(DEVICE)
     # logits_for_answers = logits[torch.arange(len(logits)),reference_answers]
 
     # xentropy = - logits_for_answers + torch.log(torch.sum(torch.exp(logits),axis=-1))
@@ -62,7 +62,7 @@ def grad_softmax_crossentropy_with_logits(logits, reference_answers):
     # Compute crossentropy gradient from logits[batch,n_classes] and ids of correct answers
     # ones_for_answers = torch.zeros_like(logits)
     # ones_for_answers[torch.arange(len(logits)),reference_answers] = 1
-    one_hot = torch.nn.functional.one_hot(reference_answers, 10)
+    one_hot = torch.nn.functional.one_hot(reference_answers, 10).to(DEVICE)
 
     softmax = logits.softmax(1)  # torch.exp(logits) / torch.exp(logits).sum(axis=-1,keepdims=True)
 
@@ -131,10 +131,6 @@ def run_crypten_mnist(num_epochs, learning_rate, batch_size):
         torch.manual_seed(seed)
         np.random.seed(seed)
     X_train, y_train, X_test, y_test = load_mnist()
-    X_train.to(DEVICE)
-    y_train.to(DEVICE)
-    X_test.to(DEVICE)
-    y_test.to(DEVICE)
     network = []
     network.append(Dense(X_train.shape[1], 100, learning_rate, DEVICE))
     network.append(ReLU())
@@ -144,6 +140,6 @@ def run_crypten_mnist(num_epochs, learning_rate, batch_size):
     for epoch in range(num_epochs):
         for x_batch, y_batch in iterate_minibatches(X_train, y_train, batch_size=batch_size, shuffle=True):
             x_batch = crypten.cryptensor(x_batch, device=DEVICE)  # encrypt the features
-
+            y_batch.to(DEVICE)
             loss = train(network, x_batch, y_batch)
             print(loss.get_plain_text())

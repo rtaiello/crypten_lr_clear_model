@@ -49,8 +49,8 @@ class Dense(Layer):
         super().__init__()
         self.learning_rate = learning_rate
         self.weights = torch.normal(mean=torch.zeros((input_units, output_units)),
-                                    std=math.sqrt(2 / (input_units + output_units)), device=device)
-        self.biases = torch.zeros(output_units, device=device)
+                                    std=math.sqrt(2 / (input_units + output_units))).to(device)
+        self.biases = torch.zeros(output_units).to(device)
 
     def forward(self, input: crypten.CrypTensor) -> crypten.CrypTensor:
         # Perform an affine transformation:
