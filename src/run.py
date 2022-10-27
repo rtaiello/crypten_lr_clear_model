@@ -131,12 +131,16 @@ def run_crypten_mnist(num_epochs, learning_rate, batch_size):
         torch.manual_seed(seed)
         np.random.seed(seed)
     X_train, y_train, X_test, y_test = load_mnist()
+    X_train.to(DEVICE)
+    y_train.to(DEVICE)
+    X_test.to(DEVICE)
+    y_test.to(DEVICE)
     network = []
-    network.append(Dense(X_train.shape[1], 100, learning_rate))
+    network.append(Dense(X_train.shape[1], 100, learning_rate, DEVICE))
     network.append(ReLU())
-    network.append(Dense(100, 200, learning_rate))
+    network.append(Dense(100, 200, learning_rate, DEVICE))
     network.append(ReLU())
-    network.append(Dense(200, 10, learning_rate))
+    network.append(Dense(200, 10, learning_rate, DEVICE))
     for epoch in range(num_epochs):
         for x_batch, y_batch in iterate_minibatches(X_train, y_train, batch_size=batch_size, shuffle=True):
             x_batch = crypten.cryptensor(x_batch, device=DEVICE)  # encrypt the features

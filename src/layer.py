@@ -43,14 +43,14 @@ class ReLU(Layer):
 
 
 class Dense(Layer):
-    def __init__(self, input_units: int, output_units: int, learning_rate: float=0.1)->None:
+    def __init__(self, input_units: int, output_units: int, learning_rate: float=0.1, device:str="cpu")->None:
         # A dense layer is a layer which performs a learned affine transformation:
         # f(x) = <W*x> + b
         super().__init__()
         self.learning_rate = learning_rate
         self.weights = torch.normal(mean=torch.zeros((input_units, output_units)),
-                                    std=math.sqrt(2 / (input_units + output_units)))
-        self.biases = torch.zeros(output_units)
+                                    std=math.sqrt(2 / (input_units + output_units)), device=device)
+        self.biases = torch.zeros(output_units, device=device)
 
     def forward(self, input: crypten.CrypTensor) -> crypten.CrypTensor:
         # Perform an affine transformation:
