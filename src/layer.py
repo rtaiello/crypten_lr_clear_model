@@ -37,6 +37,7 @@ class ReLU(Layer):
 
     def backward(self, input:crypten.CrypTensor, grad_output: crypten.CrypTensor) -> crypten.CrypTensor:
         # Compute gradient of loss w.r.t. ReLU input
+
         relu_grad = input > 0
         return grad_output * relu_grad
 

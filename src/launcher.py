@@ -59,7 +59,7 @@ parser.add_argument(
 parser.add_argument(
     "--lr",
     "--learning-rate",
-    default=0.001,
+    default=0.1,
     type=float,
     metavar="LR",
     help="initial learning rate",
@@ -100,14 +100,14 @@ parser.add_argument(
 
 def _run_experiment(args):
     # only import here to initialize crypten within the subprocesses
-    from src.run import run_lr_mnist
+    from src.run import run_crypten_mnist
 
     # Only Rank 0 will display logs.
     level = logging.INFO
     if "RANK" in os.environ and os.environ["RANK"] != "0":
         level = logging.CRITICAL
     logging.getLogger().setLevel(level)
-    run_lr_mnist(
+    run_crypten_mnist(
         num_epochs=args.epochs,
         learning_rate=args.lr,
         batch_size=args.batch_size

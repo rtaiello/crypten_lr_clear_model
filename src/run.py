@@ -1,4 +1,7 @@
+import random
+from tqdm import trange
 import crypten
+import numpy as np
 import torch
 import torchvision
 import os
@@ -111,10 +114,32 @@ def train(network, X, y):
         loss_grad = layer.backward(layer_inputs[layer_index], loss_grad)  # grad w.r.t. input, also weight updates
     return loss  # torch.mean(loss)
 
-X_train, y_train, X_test, y_test = load_mnist()
-network = []
-network.append(Dense(X_train.shape[1], 100))
-network.append(ReLU())
-network.append(Dense(100, 200))
-network.append(ReLU())
-network.append(Dense(200, 10))
+def iterate_minibatches(inputs, targets, batch_size, shuffle=False):
+    assert len(inputs) == len(targets)
+    if shuffle:
+        indices = np.random.permutation(len(inputs))
+    for start_idx in trange(0, len(inputs) - batch_size + 1, batch_size):
+        if shuffle:
+            excerpt = indices[start_idx:start_idx + batch_size]
+        else:
+            excerpt = slice(start_idx, start_idx + batch_size)
+        yield inputs[excerpt], targets[excerpt]
+
+def run_crypten_mnist(num_epochs, learning_rate, batch_size):
+    if seed is not None:
+        random.seed(seed)
+        torch.manual_seed(seed)
+        np.random.seed(seed)
+    X_train, y_train, X_test, y_test = load_mnist()
+    network = []
+    network.append(Dense(X_train.shape[1], 100, learning_rate))
+    network.append(ReLU())
+    network.append(Dense(100, 200, learning_rate))
+    network.append(ReLU())
+    network.append(Dense(200, 10, learning_rate))
+    for epoch in range(num_epochs):
+        for x_batch, y_batch in iterate_minibatches(X_train, y_train, batch_size=batch_size, shuffle=True):
+            x_batch = crypten.cryptensor(x_batch, device=DEVICE)  # encrypt the features
+
+            loss = train(network, x_batch, y_batch)
+            print(loss.get_plain_text())
